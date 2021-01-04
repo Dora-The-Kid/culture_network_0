@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 n = 80
 a = np.random.random(n)
 Type = np.ones(shape=n)
-Type[a<0.1] = 0
+#Type[a<0.1] = 0
 w = np.zeros((n,n),dtype=np.float32)
 
 p_reccur = np.random.uniform(0,1,(n,n))
@@ -15,9 +15,10 @@ print(p_reccur>0.8)
 
 #w[p_reccur>0.8] =
 
-w[p_reccur>0.8] =np.random.normal(3.41, 3, size=w[p_reccur > 0.8].shape)
+w[p_reccur>0.8] =np.random.normal(1.85, 0.5, size=w[p_reccur > 0.8].shape)
 
 w = np.abs(w)
+
 
 # w[4:42,0] = 2
 # w[42::,1] = 2
@@ -35,10 +36,14 @@ w[16:80,16:80] = w[16:80,16:80]*0.8
 
 print(w)
 
-T = 3000
-dt = 0.05
-w = w.T
-
+T = 500
+dt = 0.025
+import network_gen
+#w = network_gen.small_world_network(80,10,0)
+#w = w
+#w = np.array(w)
+np.savetxt('strangr_1.txt',w)
+#w = np.loadtxt('W_samll_world.txt')
 # n = 100
 # Type = np.ones(shape=n)
 # w = np.zeros(shape=(n,n))
@@ -62,12 +67,13 @@ satge = []
 mK = []
 background_input = np.arange(80,240,2)
 for i in range(step):
+    print(i)
 
 
     if  i == 100/dt :
         print('50***')
         network.background_input = np.zeros(shape=n)
-        network.background_input[0] = 1000
+        network.background_input[0] = 100/dt
     # elif i == 200/dt:
     #     network.background_input = np.zeros(shape=n)
     #     network.background_input[2:4] = 1000
@@ -109,23 +115,36 @@ print(say.shape)
 print(spike)
 print(spike.shape)
 plt.figure()
+plt.title('voltage')
+plt.ylabel('V/mv')
+plt.xlabel('time/ms')
 plt.plot(np.arange(T/dt)*dt,voltage, alpha = 0.3)
 plt.figure()
 plt.plot(np.arange(T/dt)*dt,mK , alpha = 0.3)
 plt.title('mk')
+plt.xlabel('time/ms')
+plt.ylabel('pobability')
 plt.figure()
 plt.plot(np.arange(T/dt)*dt,voltage[:,0], alpha = 0.3)
 plt.title('V0')
+plt.ylabel('V/mv')
+plt.xlabel('time/ms')
 plt.figure()
-plt.plot(np.arange(T/dt)*dt,Ca[:,0], alpha = 0.3)
+plt.plot(np.arange(T/dt)*dt,Ca[:,5], alpha = 0.3)
 plt.title('Ca_5')
+plt.ylabel('concentration/mu mol')
+plt.xlabel('time/ms')
 plt.figure()
-plt.title('sayrate')
+plt.title('sayrate_5')
 plt.plot(np.arange(T/dt)*dt,sayrate, alpha = 0.3)
+plt.ylabel('Hz')
+plt.xlabel('time/ms')
 plt.figure()
 plt.title('GE')
 plt.plot(np.arange(T/dt)*dt,Ge, alpha = 0.3,color='blue')
 plt.plot(np.arange(T/dt)*dt,satge, alpha = 0.3,color='red')
+plt.xlabel('time/ms')
+plt.ylabel('mu S')
 plt.figure()
 plt.plot(np.arange(T/dt)*dt,X, alpha = 0.3,color= 'blue')
 plt.plot(np.arange(T/dt)*dt,Y, alpha = 0.3, color= 'red')
@@ -163,19 +182,21 @@ plt.plot(np.arange(T/dt)*dt,satge, alpha = 0.3)
 # plt.xlabel('I(uA)')
 # plt.ylabel('firing_rate (times/s)')
 
-plt.show()
+
 print(network.firing_time_raster)
 
 print(np.sum(w))
 #print(network.cortical_matrix)
-# import seaborn as sns
-# plt.figure()
-# sns.set()
-# #ax = sns.heatmap(R)
-# yticklabels =yticks = np.linspace(0,10,1)/20
-# ax = sns.heatmap(w, annot=True,center=0.5,cmap='YlGnBu',vmin=0,vmax=1)
-# ax.set_ylim(5.0, 0)
-# plt.title('befor',fontsize='large',fontweight='bold')
+import seaborn as sns
+plt.figure()
+sns.set()
+#ax = sns.heatmap(R)
+yticklabels =yticks = np.linspace(0,10,1)/50
+W = (w-np.average(w))/np.std(w)
+ax = sns.heatmap(W, annot=False,center=0.5,cmap='YlGnBu',vmin=0,vmax=1)
+ax.set_ylim(80, 0)
+ax.set_xlim(0,80)
+plt.title('befor',fontsize='large',fontweight='bold')
 #
 # plt.figure()
 # sns.set()
@@ -186,4 +207,4 @@ print(np.sum(w))
 #
 # plt.title('after',fontsize='large',fontweight='bold')
 #
-# plt.show()
+plt.show()

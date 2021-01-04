@@ -32,8 +32,10 @@ import numpy as np
 # print(d[0,:])
 import math
 import matplotlib.pyplot as plt
-V_x = np.arange(-60,30)
-F =  (1+np.tanh((V_x- 2) /(30)))/2
-plt.figure()
-plt.plot(V_x,F)
-plt.show()
+# V_x = np.arange(-60,30)
+# F =  (1+np.tanh((V_x- 2) /(30)))/2
+# plt.figure()
+# plt.plot(V_x,F)
+# plt.show()
+print(np.exp(128))
+print(2**128)

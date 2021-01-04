@@ -76,7 +76,7 @@ class network(object):
         self.beta = 1.25e-3
         self.gamma_ca = 6.5e-3
         self.theta = 0.04
-        self.xi =0.00625
+        self.xi = 0.00625
         self.kr = 0.2951
         self.ka = 0.1
         self.Ip = 0.002e-3
@@ -142,20 +142,42 @@ class network(object):
 
     def force_input(self):
 
-        asynchronous_release = self.eta_max *np.power(self.CaConcen, self.order) / (math.pow(self.ka, self.order) + np.power(self.CaConcen, self.order))*self.dt
+        asynchronous_release = []
 
-        self.asynrate = self.eta_max *np.power(self.CaConcen, self.order) / (math.pow(self.ka, self.order) + np.power(self.CaConcen, self.order))*self.dt
+        self.asynrate = (self.eta_max *np.power(self.CaConcen, self.order) / (math.pow(self.ka, self.order) + np.power(self.CaConcen, self.order)))
+        possion_rate = self.asynrate*self.dt
+
+        np.random.seed(seed=123)
+
+
+        for i in range(len(possion_rate)):
+
+            n = np.random.poisson(lam=possion_rate[i],size=self.n)
+            spike_array = []
+            #spike_array = np.random.random(n) * self.dt
+            for j in range(len(n)):
+                spiking_time =np.sum(np.random.random(n[j]))
+
+                #spiking_time = np.sum(np.random.rand(n[j]))
+
+                spike_array.append(spiking_time)
+
+            asynchronous_release.append( spike_array)
+        #asynchronous_release = np.array(asynchronous_release)
         #print(asynchronous_release)
         #asynchronous_release = 1
 
 
+
         asynchronous_release = np.array(asynchronous_release)
-        # print(asynchronous_release.shape)
+        #print(asynchronous_release.shape)
+        #print(asynchronous_release)
         # print('X')
         # print(self.X[0,:])
         # print(self.X[:,5])
         # print(self.X[:,0])
         increment = self.xi*asynchronous_release*np.tanh(self.alpha*self.X)
+        #print(np.nonzero(increment))
         # print('increment')
         # print(increment[0,:])
         # print(increment[:,0])
