@@ -18,11 +18,11 @@ class network(object):
         self.Maxnum_search = 100
         self.type = np.array(type)
         self.state = np.full(shape=self.n,fill_value=0)
-        self.GMAX = 6
+        self.GMAX = 10
         #cortical_matrix[index_neuron][synapse_index]
         self.cortical_matrix = np.array(w)
         self.STDP_RULE ='LOG_RULE'
-        self.C = 1
+        self.C = 1#1
         #shape = [output,input]
         self.X = np.full(shape=(self.n,self.n),fill_value=1,dtype=np.float64)
         self.Y = np.full(shape=(self.n,self.n),fill_value=0,dtype=np.float64)
@@ -44,7 +44,7 @@ class network(object):
 
         self.AMINUS = 0.016
 
-        self.eta_max = 0.95
+        self.eta_max = 1
 
         self.firing_time_raster = {x: [] for x in range(self.n)}
         self.Vot_Excitatory =0
@@ -61,7 +61,9 @@ class network(object):
         self.tau_1 =1250
         self.g_l =2
         self.g_Ca =4.4
-        self.g_K =8
+
+        self.g_K =7.5#8
+
         self.V = np.full(shape=self.n,fill_value=-40,dtype=np.float64)
         self.V_Leakage =-60
         self.V_Ca = 120
@@ -76,13 +78,17 @@ class network(object):
         self.beta = 1.25e-3
         self.gamma_ca = 6.5e-3
         self.theta = 0.04
-        self.xi = 0.00625
+        self.xi = 0.0095#0.00625
         self.kr = 0.2951
         self.ka = 0.1
         self.Ip = 0.002e-3
         self.applied_current = 3.5
-        self.u_porssion_forse = 0.25
+        self.u_porssion_forse = 0.25#0.19
         self.order = 4
+        self.possion_rate = 0
+
+        self.spike_train_output = np.zeros(shape=self.n)
+
 
         #test
 
@@ -129,34 +135,48 @@ class network(object):
         self.coeff32_0 = self.tau_r * self.tau_s / c0
         self.external_W = external_W
         self.external_spike = None
-        self.external_ge = np.full(shape=self.n,fill_value=0,dtype=np.float64)
+
         self.asynrate = None
         self.asynge =np.full(shape=(self.n,self.n),fill_value=0,dtype=np.float64)
+        self.increment = None
+
+        #for outside in_put spike train
+        self.input_w = None
+        self.input_spike = None
+        self.g_in = None
+        self.input_X = 0.8
+        self.sike_train_input_flag = False
+
+    def spike_train_input(self):
+        increment = self.u_porssion_forse * np.tanh(self.alpha * self.input_X)*self.input_spike
+        self.g_in += -self.g_in /self.tau_d *self.dt
+        self.g_in += increment*self.input_w
 
 
-    def external_input(self):
-        increment =  self.u_porssion_forse * np.tanh(np.full(shape=self.n,fill_value=0.5))
-        self.external_ge += self.external_spike* increment*self.external_W
+
+
+
 
 
 
     def force_input(self):
 
         asynchronous_release = []
+        #np.random.seed(123)
 
         self.asynrate = (self.eta_max *np.power(self.CaConcen, self.order) / (math.pow(self.ka, self.order) + np.power(self.CaConcen, self.order)))
-        possion_rate = self.asynrate*self.dt
+        self.possion_rate = possion_rate = 0.4*self.asynrate*self.dt
 
-        np.random.seed(seed=123)
 
 
         for i in range(len(possion_rate)):
 
-            n = np.random.poisson(lam=possion_rate[i],size=self.n)
+            n = np.random.poisson(lam=self.possion_rate[i],size=self.n)
             spike_array = []
+            #spike_array = n
             #spike_array = np.random.random(n) * self.dt
             for j in range(len(n)):
-                spiking_time =np.sum(np.random.random(n[j]))
+                spiking_time =n[j]*1
 
                 #spiking_time = np.sum(np.random.rand(n[j]))
 
@@ -176,7 +196,7 @@ class network(object):
         # print(self.X[0,:])
         # print(self.X[:,5])
         # print(self.X[:,0])
-        increment = self.xi*asynchronous_release*np.tanh(self.alpha*self.X)
+        self.increment = increment = self.xi*asynchronous_release*np.tanh(self.alpha*self.X)
         #print(np.nonzero(increment))
         # print('increment')
         # print(increment[0,:])
@@ -373,10 +393,14 @@ class network(object):
         if self.external_W != None:
             #self.external_input()
             print('111')
-            self.background_input = self.external_W*self.external_ge*(self.V-self.Vot_Excitatory)
+            #self.background_input = self.external_W*self.external_ge*(self.V-self.Vot_Excitatory)
 
             #print('back_ground')
             #print(self.background_input)
+
+        if self.sike_train_input_flag ==True:
+            self.background_input = -np.sum(self.g_in*(self.V - self.Vot_Excitatory),axis=1)
+
 
 
 
@@ -478,6 +502,7 @@ class network(object):
 
 
         spike_neuron,spike_index = self.get_fired_neuron(self.V,nextV)
+
         spike_finished_neuron , spike_finished_index = self.get_fire_finished_neuron(self.V,nextV)
 
         self.short_term_plasticity_use()
@@ -488,13 +513,19 @@ class network(object):
         self.CaConcen = nextCaConcen
         self.asynge = nextasynge
 
+        self.spike_train_output = np.zeros(shape=self.n)
+
+        if self.sike_train_input_flag ==True:
+            self.spike_train_input()
+
 
         if len(spike_index):
+            self.spike_train_output[spike_index] = 1
             self.spikeing_time(self.time, self.time + self.dt, spike_index, nextV, nextmK, nextge, nextCaConcen)
             print(spike_index)
             print('666')
             for i in spike_index:
-                self.stdp(i)
+                #self.stdp(i)
                 self.calcium(i)
                 self.force_cortic(i)
 

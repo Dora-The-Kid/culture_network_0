@@ -15,9 +15,13 @@ print(p_reccur>0.8)
 
 #w[p_reccur>0.8] =
 
-w[p_reccur>0.8] =np.random.normal(1.85, 0.5, size=w[p_reccur > 0.8].shape)
+w[p_reccur>0.8] =np.random.normal(4, 2, size=w[p_reccur > 0.8].shape)
+print(np.sum(w))
 
 w = np.abs(w)
+ratio=4000/np.sum(w)
+w = w*ratio
+print(np.sum(w))
 
 
 # w[4:42,0] = 2
@@ -34,16 +38,20 @@ w[16:80,16:80] = w[16:80,16:80]*0.8
 # w[4,0] = 2.2
 # w[:,4] = 2
 
-print(w)
+print(np.nonzero(w)[0].shape)
 
-T = 500
-dt = 0.025
+T =6500
+dt = 0.0125
 import network_gen
-#w = network_gen.small_world_network(80,10,0)
-#w = w
-#w = np.array(w)
-np.savetxt('strangr_1.txt',w)
-#w = np.loadtxt('W_samll_world.txt')
+# w = network_gen.small_world_network(80,10,0)
+# w = w
+# w = np.array(w)
+#np.savetxt('Ach_1.txt',w)
+w = np.loadtxt('Ach_1.txt')
+# print(np.sum(w))
+ratio=6100/np.sum(w)
+w = w*ratio
+
 # n = 100
 # Type = np.ones(shape=n)
 # w = np.zeros(shape=(n,n))
@@ -62,15 +70,20 @@ Y = []
 Z = []
 S = []
 Ge = []
+In = []
 sayrate = []
 satge = []
 mK = []
+spike_array = []
 background_input = np.arange(80,240,2)
+
+
 for i in range(step):
-    print(i)
+    #print(i)
 
 
-    if  i == 100/dt :
+    #if  50.025/dt >i > 50/dt :
+    if  i == 50 / dt :
         print('50***')
         network.background_input = np.zeros(shape=n)
         network.background_input[0] = 100/dt
@@ -95,6 +108,7 @@ for i in range(step):
     S.append(network.S[5,0])
     mK.append(network.mK)
     Ge.append(np.sum(network.ge[5,:]))
+    In.append(np.sum(network.increment[5,:]))
 
     sayrate.append(network.asynrate[5])
     satge.append(np.sum(network.asynge[5,:]))
@@ -102,14 +116,24 @@ for i in range(step):
 
     Ca.append(network.CaConcen)
     voltage.append(V)
+    spike_array.append(network.spike_train_output)
 
     #print(network.dV)
+#np.savetxt('strangr_1_4.txt',network.cortical_matrix)
+# np.savetxt('X_1.txt',np.array(X))
+# np.savetxt('Y_1.txt',np.array(Y))
+# np.savetxt('Z_1.txt',np.array(Z))
+# np.savetxt('S_1.txt',np.array(S))
+print(np.sum(network.cortical_matrix))
 voltage = np.array(voltage)
 spike = network.spike_record_scatter
 spike = np.array(spike)
+spike_array = np.array(spike_array)
+np.savetxt('Ach_array.txt',spike_array)
 mK = np.array(mK)
 Ca = np.array(Ca)
-np.savetxt('reverbrtarion_spike.txt',spike)
+#np.savetxt('reverbrtarion_spike_6000ms_2_stdp.txt',spike)
+np.savetxt('Ach_spike.txt',spike)
 say = np.array(network.asynrate)
 print(say.shape)
 print(spike)
@@ -146,6 +170,9 @@ plt.plot(np.arange(T/dt)*dt,satge, alpha = 0.3,color='red')
 plt.xlabel('time/ms')
 plt.ylabel('mu S')
 plt.figure()
+plt.title('In')
+plt.plot(np.arange(T/dt)*dt,In, alpha = 0.3,color='blue')
+plt.figure()
 plt.plot(np.arange(T/dt)*dt,X, alpha = 0.3,color= 'blue')
 plt.plot(np.arange(T/dt)*dt,Y, alpha = 0.3, color= 'red')
 plt.plot(np.arange(T/dt)*dt,Z, alpha = 0.3, color= 'black')
@@ -169,8 +196,8 @@ plt.plot(np.arange(T/dt)*dt,satge, alpha = 0.3)
 # plt.xlabel('W')
 # plt.ylabel('Max_Voltage')
 # plt.legend(['without_Synchronous','with_Synchronous'])
-# plt.figure()
-# plt.scatter(spike[:,0],spike[:,1],cmap='viridis',linewidth=0.5,color="k",marker='.',s=9,alpha=0.5)
+plt.figure()
+plt.scatter(spike[:,0],spike[:,1],cmap='viridis',linewidth=0.5,color="k",marker='.',s=9,alpha=0.5)
 # plt.figure()
 # total = []
 # for key in network.firing_time_raster:
