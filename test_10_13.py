@@ -1,41 +1,53 @@
 import matplotlib.pyplot as plt
 import numpy as np
-# a = [
-#     [-0.6,-1,-10],
-#     [0.004,-0.02,0],
-#     [0,0,-0.1]
-# ]
-# e_vals,e_vecs = np.linalg.eig(a)
-# print(e_vals)
-# print(e_vecs)
-#
-# t  = np.arange(0,10,0.001)
-# v = -(-24.36)*np.exp(-0.59*t)+0.868*(-2.5)*np.exp(-0.026*t)-0.99*22.22*np.exp(-0.1*t)
-# #v = 0.045*22.22*np.exp(-0.1*t)
-# #v = 0.006*(-24.39)*np.exp(-0.59*t)-0.497*(-2.5)*np.exp(-0.21*t)-0.049*16.6*np.exp(-0.1*t)-14
-# plt.figure()
-# plt.plot(t,v)
-# plt.show()
-#
-# for i in  range(10):
-#     a = np.random.poisson(lam=[0.5, 0.1],size=[2,2]).T
-#     print(a)
-# a = np.ones(shape=(60,60))
-#
-# b = np.arange(0,60)
-#
-# c = b.reshape(-1,1)
-# print(c)
-# print(b*a)
-# d = c*a
-# print(d)
-# print(d[0,:])
+from scipy import stats
 import math
-import matplotlib.pyplot as plt
-# V_x = np.arange(-60,30)
-# F =  (1+np.tanh((V_x- 2) /(30)))/2
-# plt.figure()
-# plt.plot(V_x,F)
-# plt.show()
-print(np.exp(128))
-print(2**128)
+import pandas as pd
+data_1 = np.array([260925,296296,299490])
+data_2 = np.array([356846,338160,292290])
+data = [
+    [260925,296296,299490],
+    [356846,338160,292290]
+]
+data = np.array(data)
+df = pd.DataFrame(data.T,columns=['ctrl','epsc_down'])
+a =stats.levene(data_1, data_2)
+b = stats.ttest_ind(data_1,data_2,equal_var=True)
+plt.figure()
+f = df.boxplot(sym = 'o',            #异常点形状
+               vert = True,          # 是否垂直
+               whis=1.5,             # IQR
+               patch_artist = True,  # 上下四分位框是否填充
+               meanline = False,showmeans = True,  # 是否有均值线及其形状
+               showbox = True,   # 是否显示箱线
+               showfliers = True,  #是否显示异常值
+               notch = False,    # 中间箱体是否缺口
+               return_type='dict')  # 返回类型为字典
+
+plt.title('duration')
+plt.show()
+print(a,b)
+def plot_sig(xstart,xend,ystart,yend,sig):
+    for i in range(len(xstart)):
+        x = np.ones((2))*xstart[i]
+        y = np.arange(ystart[i],yend[i],yend[i]-ystart[i]-0.1)
+        plt.plot(x,y,label="$y$",color="black",linewidth=1)
+
+        x = np.arange(xstart[i],xend[i]+0.1,xend[i]-xstart[i])
+        y = yend[i]+0*x
+        plt.plot(x,y,label="$y$",color="black",linewidth=1)
+
+        x0 = (xstart[i]+xend[i])/2
+        y0=yend[i]
+        plt.annotate(r'%s'%sig, xy=(x0, y0), xycoords='data', xytext=(-15, +1),
+                     textcoords='offset points', fontsize=16,color="red")
+        x = np.ones((2))*xend[i]
+        y = np.arange(ystart[i],yend[i],yend[i]-ystart[i]-0.1)
+        plt.plot(x,y,label="$y$",color="black",linewidth=1)
+        plt.ylim(0,math.ceil(max(yend)+4))             #使用plt.ylim设置y坐标轴范围
+    #     plt.xlim(math.floor(xstart)-1,math.ceil(xend)+1)
+        #plt.xlabel("随便画画")         #用plt.xlabel设置x坐标轴名称
+        '''设置图例位置'''
+        #plt.grid(True)
+    plt.show()
+plot_sig([0.42,1.42],[1.42,2.42],[30,20],[30.8,20.8],'***')

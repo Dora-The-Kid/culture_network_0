@@ -62,7 +62,7 @@ class network(object):
         self.g_l =2
         self.g_Ca =4.4
 
-        self.g_K =7.5#8
+        self.g_K =8#8
 
         self.V = np.full(shape=self.n,fill_value=-40,dtype=np.float64)
         self.V_Leakage =-60
@@ -83,7 +83,7 @@ class network(object):
         self.ka = 0.1
         self.Ip = 0.002e-3
         self.applied_current = 3.5
-        self.u_porssion_forse = 0.25#0.19
+        self.u_porssion_forse = 0.19#0.25
         self.order = 4
         self.possion_rate = 0
 

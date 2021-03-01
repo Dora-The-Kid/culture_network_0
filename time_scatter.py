@@ -25,6 +25,7 @@ final = index[np.vstack((space,[[len(index)-1]]))]
 start = index[np.vstack(([[0]],space+1))]
 print(final)
 print(start)
+print(len(start)+1)
 
 #print(index[space[0,0]-1],index[space[0,0]],index[space[0,0]+1])
 
@@ -32,7 +33,7 @@ mid = index[np.rint((space + np.vstack(([[0]],np.delete(space,-1,0)+1)))/2).asty
 average_fire_time = np.average(final[5:30]-start[5:30])
 average_wating_time = np.average(start[6:31]-final[5:30])
 total = final[-1]-start[0]
-print('fire,wait，total',average_fire_time,average_wating_time,total)
+print('fire,wait，total,time',average_fire_time,average_wating_time,total,len(start)+1)
 
 plt.vlines(final[-1]*0.0125,ymax=80,ymin=0,color = 'r',alpha = 0.5)
 plt.vlines(start[0]*0.0125,ymax=80,ymin=0,color = 'b',alpha = 0.5)
