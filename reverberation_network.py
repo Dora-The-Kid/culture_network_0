@@ -189,7 +189,7 @@ class network(object):
 
 
 
-        asynchronous_release = np.array(asynchronous_release)
+        asynchronous_release = np.array(asynchronous_release).T
         #print(asynchronous_release.shape)
         #print(asynchronous_release)
         # print('X')
